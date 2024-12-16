@@ -1,5 +1,4 @@
-import { APIOperations } from '@builder.io/data-plugin-tools';
-import { CommerceAPIOperations } from '@builder.io/commerce-plugin-tools';
+import { APIOperations, CommerceAPIOperations } from "@builder.io/plugin-tools";
 interface DataPluginConfig extends APIOperations {
     name: string;
     icon: string;

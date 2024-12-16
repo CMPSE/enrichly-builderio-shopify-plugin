@@ -1,8 +1,11 @@
-import { APIOperations, ResourceType } from '@builder.io/data-plugin-tools';
-import appState from '@builder.io/app-context';
-import { CommerceAPIOperations } from '@builder.io/commerce-plugin-tools';
-import pkg from '../package.json';
-type ShopifyResourceType = 'product' | 'collection';
+import {
+  APIOperations,
+  ResourceType,
+  CommerceAPIOperations,
+} from "@builder.io/plugin-tools";
+import appState from "@builder.io/app-context";
+import pkg from "../package.json";
+type ShopifyResourceType = "product" | "collection";
 
 const buildPath = ({
   resource,
@@ -15,10 +18,10 @@ const buildPath = ({
     return `${resource}/${resourceId}`;
   } else {
     switch (resource) {
-      case 'collection':
+      case "collection":
         // we have a unified collection search endpoint
         return `search/collection`;
-      case 'product':
+      case "product":
         return `search/product`;
     }
   }
@@ -41,9 +44,9 @@ const buildShopifyUrl = ({
   const search = new URLSearchParams({
     pluginId: pkg.name,
     apiKey: appState.user.apiKey!,
-    query: query ? `title:*${query}*` : '',
+    query: query ? `title:*${query}*` : "",
     first: (first || 20).toString(),
-    sortKey: 'TITLE',
+    sortKey: "TITLE",
   });
 
   return `${base}/${path}?${search}`;
@@ -55,14 +58,14 @@ const RESOURCE_TYPES: {
   description: string;
 }[] = [
   {
-    name: 'Product',
-    id: 'product',
-    description: 'All of your Shopify custom app products.',
+    name: "Product",
+    id: "product",
+    description: "All of your Shopify custom app products.",
   },
   {
-    name: 'Collection',
-    id: 'collection',
-    description: 'All of your Shopify custom app products.',
+    name: "Collection",
+    id: "collection",
+    description: "All of your Shopify custom app products.",
   },
 ];
 
@@ -71,24 +74,27 @@ interface DataPluginConfig extends APIOperations {
   icon: string;
 }
 
-export const getDataConfig = (service: CommerceAPIOperations): DataPluginConfig => {
+export const getDataConfig = (
+  service: CommerceAPIOperations
+): DataPluginConfig => {
   return {
-    name: 'Shopify',
-    icon: 'https://cdn.builder.io/api/v1/image/assets%2FYJIGb4i01jvw0SRdL5Bt%2Fc9156e9ba658458db6fcad3f101773c7',
+    name: "Shopify",
+    icon:
+      "https://cdn.builder.io/api/v1/image/assets%2FYJIGb4i01jvw0SRdL5Bt%2Fc9156e9ba658458db6fcad3f101773c7",
     getResourceTypes: async () =>
       RESOURCE_TYPES.map(
         (model): ResourceType => ({
           ...model,
           inputs: () => [
             {
-              friendlyName: 'limit',
-              name: 'first',
-              type: 'number',
+              friendlyName: "limit",
+              name: "first",
+              type: "number",
               defaultValue: 10,
               max: 60,
               min: 0,
             },
-            { friendlyName: 'Search', name: 'query', type: 'string' },
+            { friendlyName: "Search", name: "query", type: "string" },
           ],
           toUrl: ({ entry, query, first }) =>
             buildShopifyUrl({
@@ -113,9 +119,11 @@ export const getDataConfig = (service: CommerceAPIOperations): DataPluginConfig 
         ];
       }
 
-      const response = await service[resourceTypeId].search(options.searchText || '');
+      const response = await service[resourceTypeId].search(
+        options.searchText || ""
+      );
 
-      return response.map(result => ({
+      return response.map((result) => ({
         id: String(result.id),
         name: result.title,
       }));

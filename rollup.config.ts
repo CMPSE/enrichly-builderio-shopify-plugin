@@ -1,18 +1,15 @@
-import resolve from 'rollup-plugin-node-resolve';
-import commonjs from 'rollup-plugin-commonjs';
-import sourceMaps from 'rollup-plugin-sourcemaps';
-import camelCase from 'lodash.camelcase';
-import typescript from 'rollup-plugin-typescript2';
-import json from 'rollup-plugin-json';
-import replace from 'rollup-plugin-replace';
-import serve from 'rollup-plugin-serve';
-import nodePolyfills from 'rollup-plugin-node-polyfills';
+import replace from "rollup-plugin-replace";
+import serve from "rollup-plugin-serve";
+import esbuild from "rollup-plugin-esbuild";
+import { nodeResolve } from "@rollup/plugin-node-resolve";
+import json from "@rollup/plugin-json";
+import common from "@rollup/plugin-commonjs";
 
-const SERVE = process.env.SERVE === 'true';
+const SERVE = process.env.SERVE === "true";
 
-const pkg = require('./package.json');
+const pkg = require("./package.json");
 
-const libraryName = 'plugin';
+const libraryName = "plugin";
 
 export default {
   input: `src/${libraryName}.ts`,
@@ -21,61 +18,39 @@ export default {
   // Do not change these! If you install new dependenies, that is ok, they should be
   // left out of this list
   external: [
-    'react',
-    '@builder.io/react',
-    '@builder.io/app-context',
-    '@material-ui/core',
-    '@emotion/core',
-    '@emotion/styled',
-    'mobx',
-    'react-dom',
-    'mobx-react',
+    "react",
+    "@builder.io/react",
+    "@builder.io/sdk",
+    "@builder.io/app-context",
+    "@material-ui/core",
+    "@emotion/core",
+    "@emotion/styled",
+    "mobx",
+    "react-dom",
+    "mobx-react",
   ],
-  output: [
-    {
-      file: pkg.main,
-      name: camelCase(libraryName),
-      format: 'umd',
-      sourcemap: true,
-    },
-    { file: pkg.module, format: 'es', sourcemap: true },
-    { file: pkg.unpkg, format: 'system', sourcemap: true },
-  ],
+  output: [{ file: pkg.unpkg, format: "system", sourcemap: true }],
   watch: {
-    include: 'src/**',
+    include: "src/**",
   },
   plugins: [
-    // Allow json resolution
-    json(),
-    // Compile TypeScript files
-    typescript({ useTsconfigDeclarationDir: true }),
-    // Allow bundling cjs modules (unlike webpack, rollup doesn't understand cjs)
-    commonjs({
-      extensions: ['.js', '.ts', '.tsx'],
-    }),
-    // Allow node_modules resolution, so you can use 'external' to control
-    // which external modules to include in the bundle
-    // https://github.com/rollup/rollup-plugin-node-resolve#usage
-    resolve(),
-
     replace({
-      'process.env.NODE_ENV': JSON.stringify('production'),
+      "process.env.NODE_ENV": JSON.stringify("production"),
     }),
+    json(),
+    nodeResolve({ mainFields: ["module", "browser"] }),
+    common(),
+    esbuild(),
 
-    // Resolve source maps to the original source
-    sourceMaps(),
-    nodePolyfills(),
     ...(SERVE
       ? [
           serve({
-            contentBase: 'dist',
+            contentBase: "dist",
             port: 1268,
             headers: {
-              'Access-Control-Allow-Origin': '*',
+              "Access-Control-Allow-Origin": "*",
               // https://developer.chrome.com/blog/private-network-access-preflight/#new-in-pna
-              'Access-Control-Allow-Private-Network': 'true',
-
-              'Access-Control-Allow-Private-Network': 'true',
+              "Access-Control-Allow-Private-Network": "true",
             },
           }),
         ]
